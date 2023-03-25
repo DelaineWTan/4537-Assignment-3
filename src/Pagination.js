@@ -5,7 +5,7 @@ function Pagination({ pokemons, PAGE_SIZE, currentPage, setCurrentPage }) {
   const pageNumbers = [];
   for (
     let i = Math.max(0, currentPage - 6);
-    i <= Math.min(Math.floor(pokemons.length / PAGE_SIZE), currentPage + 3);
+    i <= Math.min(Math.floor(pokemons.length / PAGE_SIZE), currentPage + 4);
     i++
   ) {
     pageNumbers.push(i);
