@@ -4,8 +4,8 @@ import "./style.css";
 function Pagination({ pokemons, PAGE_SIZE, currentPage, setCurrentPage }) {
   const pageNumbers = [];
   for (
-    let i = Math.max(0, currentPage - 5);
-    i <= Math.min(Math.floor(pokemons.length / PAGE_SIZE), currentPage + 5);
+    let i = Math.max(0, currentPage - 6);
+    i <= Math.min(Math.floor(pokemons.length / PAGE_SIZE), currentPage + 3);
     i++
   ) {
     pageNumbers.push(i);
