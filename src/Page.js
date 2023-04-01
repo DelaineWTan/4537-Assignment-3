@@ -6,17 +6,21 @@ function Page({ pokemons, PAGE_SIZE, currentPage }) {
   const endIndex = startIndex + PAGE_SIZE;
   pokemons = pokemons.slice(startIndex, endIndex);
   return (
-    <div className="image-container">
-      {pokemons.map((pokemon) => {
-        const pokemonId = String(pokemon.id).padStart(3, "0");
-        return (
-          <img
-            className="image"
-            alt={pokemon.name.english}
-            src={`https://raw.githubusercontent.com/fanzeyi/pokemon.json/master/images/${pokemonId}.png`}
-          />
-        );
-      })}
+    <div>
+      <h1>Search Results:</h1>
+      <div className="image-container">
+        {pokemons.map((pokemon) => {
+          const pokemonId = String(pokemon.id).padStart(3, "0");
+          return (
+            <img
+              key={pokemonId}
+              className="image"
+              alt={pokemon.name.english}
+              src={`https://raw.githubusercontent.com/fanzeyi/pokemon.json/master/images/${pokemonId}.png`}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }
