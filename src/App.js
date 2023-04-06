@@ -1,3 +1,4 @@
+import LoginForm from './LoginForm';
 import Page from "./Page";
 import Pagination from "./Pagination";
 import Search from "./Search";
@@ -6,10 +7,12 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [pokemons, setPokemon] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 10;
+  
   useEffect(() => {
     async function fetchData() {
       const result = await axios.get(
@@ -26,6 +29,8 @@ function App() {
 
   return (
     <div className="App">
+      {!isLoggedIn && <LoginForm setIsLoggedIn={setIsLoggedIn} />}
+      {isLoggedIn && (<div>
       <Search
         selectedTypes={selectedTypes}
         setSelectedTypes={setSelectedTypes}
@@ -41,6 +46,7 @@ function App() {
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
       />
+      </div>)}
     </div>
   );
 }
