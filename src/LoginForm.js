@@ -5,6 +5,7 @@ import "./css/login.css";
 const LoginForm = ({ setIsLoggedIn, setAccessToken, setRefreshToken }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
 
   const serverUrl = process.env.REACT_APP_SERVER_URL;
 
@@ -24,14 +25,13 @@ const LoginForm = ({ setIsLoggedIn, setAccessToken, setRefreshToken }) => {
       );
       const accessToken = response.headers["auth-token-access"];
       const refreshToken = response.headers["auth-token-refresh"];
-      console.log("Access Token:", accessToken);
-      console.log("Refresh Token:", refreshToken);
       setAccessToken(accessToken);
       setRefreshToken(refreshToken);
-      console.log(response.data);
+      setLoginError("");
       setIsLoggedIn(true);
     } catch (error) {
       console.error("Login failed:", error);
+      setLoginError(error.response.data.message);
     }
   };
   return (
@@ -52,7 +52,10 @@ const LoginForm = ({ setIsLoggedIn, setAccessToken, setRefreshToken }) => {
           onChange={(e) => setPassword(e.target.value)}
           className="login-form-input"
         />
-        <button type="submit" className="login-form-button">Login</button>
+        {loginError && <p className="login-error-message">{loginError}</p>}
+        <button type="submit" className="login-form-button">
+          Login
+        </button>
       </form>
     </div>
   );

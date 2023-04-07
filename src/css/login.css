@@ -18,6 +18,12 @@
     border-bottom: 1px solid #ccc;
     background-color: #fff;
   }
+
+  .login-error-message {
+    color: red;
+    font-size: 14px;
+  }
+  
   
   .login-form-button {
     padding: 10px;
