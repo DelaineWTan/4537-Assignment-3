@@ -115,8 +115,7 @@ app.post(
     res.header("auth-token-access", "Bearer " + accessToken);
     res.header("auth-token-refresh", "Refresh " + refreshToken);
 
-    // res.send("All good!")
-    res.send(user);
+    res.json(user);
   })
 );
 

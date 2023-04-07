@@ -8,19 +8,24 @@ const Authenticated = ({ children, setIsLoggedIn, accessToken }) => {
     // Function to check if the user is authenticated on the server
     const checkAuthentication = async () => {
       try {
+        console.log(accessToken)
         // Send a request to your API to check for the JWT token
         const response = await axios.get(`${serverUrl}/`, {
           headers: {
-            Authorization: `Bearer ${accessToken}`, // Attach the JWT token to the request headers
+            Authorization: accessToken, // Attach the JWT token to the request headers
           },
         });
-        console.log(response.body);
-        if (response.ok) {
-          setIsLoggedIn(true); // Set isLoggedIn to true if the token is valid
-        } else {
-          setIsLoggedIn(false); // Set isLoggedIn to false if the token is invalid or not present
+        if (response.status !== 200) {
+          setIsLoggedIn(false);
+          localStorage.removeItem('isLoggedIn');
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
         }
       } catch (error) {
+        setIsLoggedIn(false);
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
         console.error("Error checking authentication:", error);
       }
     };

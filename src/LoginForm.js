@@ -2,7 +2,12 @@ import React, { useState } from "react";
 import axios from "axios";
 import "./css/login.css";
 
-const LoginForm = ({ setIsLoggedIn, setAccessToken, setRefreshToken }) => {
+const LoginForm = ({
+  setIsLoggedIn,
+  setAccessToken,
+  setRefreshToken,
+  setUser,
+}) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
@@ -25,10 +30,15 @@ const LoginForm = ({ setIsLoggedIn, setAccessToken, setRefreshToken }) => {
       );
       const accessToken = response.headers["auth-token-access"];
       const refreshToken = response.headers["auth-token-refresh"];
+      const user = response.data;
       setAccessToken(accessToken);
       setRefreshToken(refreshToken);
+      setUser(user);
       setLoginError("");
       setIsLoggedIn(true);
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
     } catch (error) {
       console.error("Login failed:", error);
       setLoginError(error.response.data.message);
