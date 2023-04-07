@@ -1,18 +1,19 @@
+import axios from "axios";
+import { useEffect, useState } from "react";
+// Components
 import LoginForm from "./LoginForm";
 import Authenticated from "./Authenticated";
 import Page from "./Page";
 import Pagination from "./Pagination";
 import Search from "./Search";
-
-import axios from "axios";
-import { useEffect, useState } from "react";
+import Dashboard from "./Dashboard";
 
 function App() {
   // Authentication State
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [accessToken, setAccessToken] = useState(null);
   const [refreshToken, setRefreshToken] = useState(null);
-  const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   // App State
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [pokemons, setPokemon] = useState([]);
@@ -32,7 +33,8 @@ function App() {
 
     setAccessToken(localStorage.getItem("accessToken"));
     setRefreshToken(localStorage.getItem("refreshToken"));
-    setUser(JSON.parse(localStorage.getItem("user")));
+    const isAdmin = localStorage.getItem("refreshToken");
+    if (isAdmin) setIsAdmin(isAdmin);
     async function fetchData() {
       const result = await axios.get(
         "https://raw.githubusercontent.com/fanzeyi/pokemon.json/master/pokedex.json"
@@ -53,7 +55,7 @@ function App() {
           setIsLoggedIn={setIsLoggedIn}
           setAccessToken={setAccessToken}
           setRefreshToken={setRefreshToken}
-          setUser={setUser}
+          setIsAdmin={setIsAdmin}
         />
       </div>
     );
@@ -81,6 +83,7 @@ function App() {
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
         />
+        {isAdmin && <Dashboard accessToken={accessToken} />}
       </Authenticated>
     </div>
   );

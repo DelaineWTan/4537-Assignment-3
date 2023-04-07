@@ -50,13 +50,12 @@ const Authenticated = ({
           localStorage.removeItem("isLoggedIn");
           localStorage.removeItem("accessToken");
           localStorage.removeItem("refreshToken");
-          localStorage.removeItem("user");
         }
       }
     };
 
     checkAuthentication();
-  }, [accessToken, serverUrl, setIsLoggedIn]);
+  }, [accessToken, setAccessToken,refreshToken, serverUrl, setIsLoggedIn]);
 
   return <div>{children}</div>;
 };

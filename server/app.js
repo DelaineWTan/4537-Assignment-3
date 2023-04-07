@@ -60,9 +60,7 @@ app.post(
       throw new AuthError("No Token: Please provide a token.");
     }
     if (!refreshTokens.includes(refreshToken)) {
-      throw new AuthError(
-        "Invalid Token: Please provide a valid token."
-      );
+      throw new AuthError("Invalid Token: Please provide a valid token.");
     }
     try {
       const payload = await jwt.verify(
@@ -77,9 +75,7 @@ app.post(
       res.header("auth-token-access", "Bearer " + accessToken);
       res.send("All good!");
     } catch (error) {
-      throw new AuthError(
-        "Invalid Token: Please provide a valid token."
-      );
+      throw new AuthError("Invalid Token: Please provide a valid token.");
     }
   })
 );
@@ -89,9 +85,7 @@ app.post(
   asyncWrapper(async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {
-      throw new BadRequest(
-        "Missing one or more of: username and/or password."
-      );
+      throw new BadRequest("Missing one or more of: username and/or password.");
     }
     const user = await userModel.findOne({ username });
     if (!user) throw new AuthError("User not found");
@@ -196,11 +190,46 @@ const authAdmin = asyncWrapper(async (req, res, next) => {
   throw new AuthError("Access denied");
 });
 
-app.use(authUser)
-app.get('/', (req, res) => {
-  res.send('ok');
+app.use(authUser);
+app.get("/", (req, res) => {
+  res.send("ok");
 });
 
+app.use(authAdmin);
+// Route for fetching unique API users over a period of time
+app.get("/uniqueApiUsers", (req, res) => {
+  // Replace with actual logic to fetch unique API users data
+  const uniqueApiUsersData = [];
+  res.json(uniqueApiUsersData);
+});
+
+// Route for fetching top API users over a period of time
+app.get("/topApiUsers", (req, res) => {
+  // Replace with actual logic to fetch top API users data
+  const topApiUsersData = [];
+  res.json(topApiUsersData);
+});
+
+// Route for fetching top users by endpoint
+app.get("/topUsersByEndpoint", (req, res) => {
+  // Replace with actual logic to fetch top users by endpoint data
+  const topUsersByEndpointData = [];
+  res.json(topUsersByEndpointData);
+});
+
+// Route for fetching 4xx errors by endpoint
+app.get("/errors4xxByEndpoint", (req, res) => {
+  // Replace with actual logic to fetch 4xx errors by endpoint data
+  const errors4xxByEndpointData = [];
+  res.json(errors4xxByEndpointData);
+});
+
+// Route for fetching recent 4xx/5xx errors
+app.get("/recentErrors4xx5xx", (req, res) => {
+  // Replace with actual logic to fetch recent 4xx/5xx errors data
+  const recentErrors4xx5xxData = [];
+  res.json(recentErrors4xx5xxData);
+});
 
 app.get("*", function (req, res) {
   throw new BadRequest("Route does not exist.");

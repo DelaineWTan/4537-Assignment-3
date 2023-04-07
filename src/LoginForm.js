@@ -6,7 +6,7 @@ const LoginForm = ({
   setIsLoggedIn,
   setAccessToken,
   setRefreshToken,
-  setUser,
+  setIsAdmin
 }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -28,18 +28,21 @@ const LoginForm = ({
           },
         }
       );
+      const user = response.data;
+      const isAdmin = user.role === 'admin'
       const accessToken = response.headers["auth-token-access"];
       const refreshToken = response.headers["auth-token-refresh"];
-      const user = response.data;
+      
+      setIsAdmin(isAdmin)
       setAccessToken(accessToken);
       setRefreshToken(refreshToken);
-      setUser(user);
       setLoginError("");
       setIsLoggedIn(true);
+      
       localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('isAdmin', isAdmin);
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
-      localStorage.setItem('user', JSON.stringify(user));
     } catch (error) {
       console.error("Login failed:", error);
       setLoginError(error.response.data.message);
