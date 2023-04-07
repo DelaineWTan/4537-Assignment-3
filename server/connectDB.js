@@ -6,9 +6,10 @@ const connectDB = async (input) => {
   try {
     const x = await mongoose.connect(process.env.DB_STRING)
     console.log("Connected to db");
-    if (input.drop === true)
+    if (input.drop === true) {
       mongoose.connection.db.dropDatabase();
       console.log("Dropped db");
+    }
   } catch (error) {
     console.log('db error');
   }

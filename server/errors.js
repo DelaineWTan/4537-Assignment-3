@@ -2,7 +2,7 @@ class AuthError extends Error {
   constructor(message) {
     super(message);
     this.name = "AuthError";
-    this.message = `Poke API Error - Authentication Error: ${message}`;
+    this.message = `Authentication Error: ${message}`;
     this.code = 401;
   }
 }
@@ -11,7 +11,7 @@ class BadRequest extends Error {
   constructor(message) {
     super(message);
     this.name = "BadRequest";
-    if (!message) this.message = "Error - Bad request: check the API doc";
+    if (!message) this.message = "Bad Request Error: check the API doc";
     this.code = 400;
   }
 }

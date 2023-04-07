@@ -18,7 +18,6 @@ app.use(
     exposedHeaders: ["auth-token-access", "auth-token-refresh"],
   })
 );
-app.use(handleErr);
 
 let refreshTokens = [];
 
@@ -198,6 +197,11 @@ const authAdmin = asyncWrapper(async (req, res, next) => {
   throw new AuthError("Access denied");
 });
 
+app.use(authUser)
+app.get('/', (req, res) => {
+  res.send('ok');
+});
+
 
 app.get("*", function (req, res) {
   throw new BadRequest("Route does not exist.");
@@ -230,4 +234,5 @@ const start = asyncWrapper(async () => {
   });
 });
 
+app.use(handleErr);
 start();
