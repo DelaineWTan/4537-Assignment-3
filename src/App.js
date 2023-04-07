@@ -30,8 +30,9 @@ function App() {
       setIsLoggedIn(false);
     }
 
-    setAccessToken(localStorage.getItem("accessToken"))
-    setRefreshToken(localStorage.getItem("refreshToken"))
+    setAccessToken(localStorage.getItem("accessToken"));
+    setRefreshToken(localStorage.getItem("refreshToken"));
+    setUser(JSON.parse(localStorage.getItem("user")));
     async function fetchData() {
       const result = await axios.get(
         "https://raw.githubusercontent.com/fanzeyi/pokemon.json/master/pokedex.json"
@@ -59,7 +60,12 @@ function App() {
   }
   return (
     <div className="App">
-      <Authenticated setIsLoggedIn={setIsLoggedIn} accessToken={accessToken}>
+      <Authenticated
+        setIsLoggedIn={setIsLoggedIn}
+        accessToken={accessToken}
+        setAccessToken={setAccessToken}
+        refreshToken={refreshToken}
+      >
         <Search
           selectedTypes={selectedTypes}
           setSelectedTypes={setSelectedTypes}

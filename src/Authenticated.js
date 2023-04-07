@@ -16,16 +16,14 @@ const Authenticated = ({ children, setIsLoggedIn, accessToken }) => {
           },
         });
         if (response.status !== 200) {
-          setIsLoggedIn(false);
-          localStorage.removeItem('isLoggedIn');
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
+            throw new Error(response.data.message); 
         }
       } catch (error) {
         setIsLoggedIn(false);
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
+        localStorage.removeItem("user");
         console.error("Error checking authentication:", error);
       }
     };

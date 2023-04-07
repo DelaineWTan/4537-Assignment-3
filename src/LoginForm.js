@@ -39,6 +39,7 @@ const LoginForm = ({
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('user', JSON.stringify(user));
     } catch (error) {
       console.error("Login failed:", error);
       setLoginError(error.response.data.message);
