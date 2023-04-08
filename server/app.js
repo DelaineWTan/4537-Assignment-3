@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose")
 const { handleErr } = require("./errorHandler.js");
 const { asyncWrapper } = require("./asyncWrapper.js");
 const dotenv = require("dotenv");
@@ -6,11 +7,13 @@ dotenv.config();
 const userModel = require("./userModel.js");
 const apiUserDataModel = require("./apiUserDataModel.js");
 const { connectDB } = require("./connectDB.js");
+const { getTypes } = require("./getTypes.js")
+const { populatePokemons } = require("./populatePokemon.js")
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
-const { AuthError, BadRequest, DbError } = require("./errors.js");
+const { AuthError, BadRequest, DbError, NotFoundError } = require("./errors.js");
 
 const app = express();
 app.use(express.json());
@@ -21,7 +24,7 @@ app.use(
 );
 
 let refreshTokens = [];
-
+let pokeModel = null;
 const parseToken = (req) => {
   if (req.header("Authorization")) {
     const [tokenType, token] = req.header("Authorization").split(" ");
@@ -204,6 +207,12 @@ app.get("/", (req, res) => {
   res.send("ok");
 });
 
+app.get('/pokemons', asyncWrapper(async (req, res) => {
+  const docs = await pokeModel.find({})
+    .sort({ "id": 1 })
+  res.json(docs)
+}))
+
 app.use(authAdmin);
 // Route for fetching unique API users over a period of time
 app.get("/uniqueApiUsers", async (req, res) => {
@@ -303,6 +312,9 @@ app.get("*", function (req, res) {
 
 const start = asyncWrapper(async () => {
   await connectDB({ drop: false });
+  const pokeSchema = await getTypes();
+  // pokeModel = await populatePokemons(pokeSchema);
+  pokeModel = mongoose.model('pokemons', pokeSchema);
 
   app.listen(process.env.SERVER_PORT, async (err) => {
     if (err) throw new DbError(err);

@@ -8,6 +8,8 @@ import Pagination from "./Pagination";
 import Search from "./Search";
 import Dashboard from "./Dashboard";
 
+const serverUrl = process.env.REACT_APP_SERVER_URL;
+
 function App() {
   // Authentication State
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -33,16 +35,27 @@ function App() {
 
     setAccessToken(localStorage.getItem("accessToken"));
     setRefreshToken(localStorage.getItem("refreshToken"));
-    const isAdmin = localStorage.getItem("refreshToken");
-    if (isAdmin) setIsAdmin(isAdmin);
+    setIsAdmin(localStorage.getItem("isAdmin") === "true");
     async function fetchData() {
-      const result = await axios.get(
-        "https://raw.githubusercontent.com/fanzeyi/pokemon.json/master/pokedex.json"
-      );
-      setPokemon(result.data);
+      try {
+        const response = await axios.get(`${serverUrl}/pokemons`, {
+          headers: {
+            Authorization: accessToken,
+          },
+        });
+        if (response.status === 200) {
+          setPokemon(response.data);
+        } else {
+          throw new Error("Failed to fetch pokemons");
+        }
+      } catch (error) {
+        console.error(error);
+      }
     }
+    
+    // Call fetchData to fetch data from server
     fetchData();
-  }, []);
+  }, [currentPage, accessToken]);
 
   const selectedPokemon = pokemons.filter((pokemon) =>
     selectedTypes.every((type) => pokemon.type.includes(type))
