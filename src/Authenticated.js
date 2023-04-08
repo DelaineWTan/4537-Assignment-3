@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import axios from "axios";
+import "./css/authenticated.css";
 
 const Authenticated = ({
   children,
@@ -55,9 +56,21 @@ const Authenticated = ({
     };
 
     checkAuthentication();
-  }, [accessToken, setAccessToken,refreshToken, serverUrl, setIsLoggedIn]);
+  }, [accessToken, setAccessToken, refreshToken, serverUrl, setIsLoggedIn]);
 
-  return <div>{children}</div>;
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+  };
+
+  return (
+    <div>
+      <button className="logout-button" onClick={handleLogout}>Logout</button>
+      {children}
+    </div>
+  );
 };
 
 export default Authenticated;

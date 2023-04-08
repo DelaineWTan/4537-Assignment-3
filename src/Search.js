@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import "./css/search.css";
 
 function Search({ selectedTypes, setSelectedTypes }) {
   const [types, setTypes] = useState([]);
@@ -24,18 +25,20 @@ function Search({ selectedTypes, setSelectedTypes }) {
 
   return (
     <div>
-      <h1>Search By Type:</h1>
-      {types.map((type) => (
-        <div key={type}>
-          <input
-            type="checkbox"
-            value={type}
-            id={type}
-            onChange={handleChange}
-          />
-          <label htmlFor={type}>{type}</label>
-        </div>
-      ))}
+      <h1 className="search-title">Search By Type:</h1>
+      <div className="checkbox-container">
+        {types.map((type) => (
+          <div key={type} className="checkbox-item">
+            <input
+              type="checkbox"
+              value={type}
+              id={type}
+              onChange={handleChange}
+            />
+            <label htmlFor={type}>{type}</label>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -1,0 +1,20 @@
+.search-title {
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+.checkbox-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+input[type="checkbox"] {
+  margin-right: 4px;
+}

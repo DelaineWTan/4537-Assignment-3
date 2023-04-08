@@ -1,4 +1,5 @@
 import React from "react";
+import "./css/page.css";
 
 function Page({ pokemons, PAGE_SIZE, currentPage }) {
   // slice pokemon array based on current page and page size
@@ -7,14 +8,14 @@ function Page({ pokemons, PAGE_SIZE, currentPage }) {
   pokemons = pokemons.slice(startIndex, endIndex);
   return (
     <div>
-      <h1>Search Results:</h1>
+      <h1 className="page-title">Search Results:</h1>
       <div className="image-container">
         {pokemons.map((pokemon) => {
           const pokemonId = String(pokemon.id).padStart(3, "0");
           return (
             <img
               key={pokemonId}
-              className="image"
+              className="pokemon-image"
               alt={pokemon.name.english}
               src={`https://raw.githubusercontent.com/fanzeyi/pokemon.json/master/images/${pokemonId}.png`}
             />

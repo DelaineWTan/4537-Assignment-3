@@ -1,0 +1,16 @@
+.page-title {
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+.image-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pokemon-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+}
