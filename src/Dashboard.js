@@ -75,7 +75,7 @@ const Dashboard = ({ accessToken }) => {
         console.error("Error fetching 4xx errors by endpoint:", error)
       );
   }, [accessToken]);
-  
+
   const fetchRecentErrors4xx5xx = useCallback(() => {
     fetch(API_URL + "/recentErrors4xx5xx", {
       headers: {
@@ -119,11 +119,13 @@ const Dashboard = ({ accessToken }) => {
           </tr>
         </thead>
         <tbody>
-          {uniqueApiUsers.map((user, index) => (
-            <tr key={index}>
-              <td>{user}</td>
-            </tr>
-          ))}
+          {uniqueApiUsers
+            .filter((user) => user !== null)
+            .map((user, index) => (
+              <tr key={index}>
+                <td>{user}</td>
+              </tr>
+            ))}
         </tbody>
       </table>
 
@@ -136,12 +138,14 @@ const Dashboard = ({ accessToken }) => {
           </tr>
         </thead>
         <tbody>
-          {topApiUsers.map((item, index) => (
-            <tr key={index}>
-              <td>{item.userId}</td>
-              <td>{item.count}</td>
-            </tr>
-          ))}
+          {topApiUsers
+            .filter((item) => item.userId !== null)
+            .map((item, index) => (
+              <tr key={index}>
+                <td>{item.userId}</td>
+                <td>{item.count}</td>
+              </tr>
+            ))}
         </tbody>
       </table>
 
@@ -170,14 +174,16 @@ const Dashboard = ({ accessToken }) => {
         <thead>
           <tr>
             <th>Endpoint</th>
-            <th>Error Count</th>
+            <th>Error Code</th>
+            <th>Timestamp</th>
           </tr>
         </thead>
         <tbody>
           {errors4xxByEndpoint.map((error, index) => (
             <tr key={index}>
               <td>{error.endpoint}</td>
-              <td>{error.count}</td>
+              <td>{error.status}</td>
+              <td>{error.timestamp}</td>
             </tr>
           ))}
         </tbody>

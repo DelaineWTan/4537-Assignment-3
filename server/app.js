@@ -1,5 +1,5 @@
 const express = require("express");
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 const { handleErr } = require("./errorHandler.js");
 const { asyncWrapper } = require("./asyncWrapper.js");
 const dotenv = require("dotenv");
@@ -7,13 +7,18 @@ dotenv.config();
 const userModel = require("./userModel.js");
 const apiUserDataModel = require("./apiUserDataModel.js");
 const { connectDB } = require("./connectDB.js");
-const { getTypes } = require("./getTypes.js")
-const { populatePokemons } = require("./populatePokemon.js")
+const { getTypes } = require("./getTypes.js");
+const { populatePokemons } = require("./populatePokemon.js");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
-const { AuthError, BadRequest, DbError, NotFoundError } = require("./errors.js");
+const {
+  AuthError,
+  BadRequest,
+  DbError,
+  NotFoundError,
+} = require("./errors.js");
 
 const app = express();
 app.use(express.json());
@@ -207,27 +212,35 @@ app.get("/", (req, res) => {
   res.send("ok");
 });
 
-app.get('/pokemons', asyncWrapper(async (req, res) => {
-  const docs = await pokeModel.find({})
-    .sort({ "id": 1 })
-  res.json(docs)
-}))
+app.get(
+  "/pokemons",
+  asyncWrapper(async (req, res) => {
+    const docs = await pokeModel.find({}).sort({ id: 1 });
+    res.json(docs);
+  })
+);
 
 app.use(authAdmin);
-// Route for fetching unique API users over a period of time
+const timeWindow = 1 * 60 * 60 * 1000; // 1 hour in milliseconds
 app.get("/uniqueApiUsers", async (req, res) => {
   try {
-    const uniqueApiUsersData = await apiUserDataModel.distinct("userId");
+    const currentTime = new Date();
+    const startTime = new Date(currentTime - timeWindow); // Calculate start time by subtracting time window from current time
+    const uniqueApiUsersData = await apiUserDataModel.distinct("userId", {
+      createdAt: { $gte: startTime, $lte: currentTime },
+    }); // Filter by createdAt field within the time window
     res.json(uniqueApiUsersData);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch unique API users data" });
   }
 });
 
-// Route for fetching top API users over a period of time
 app.get("/topApiUsers", async (req, res) => {
   try {
+    // const currentTime = new Date();
+    // const startTime = new Date(currentTime - timeWindow); // Calculate start time by subtracting time window from current time
     const topApiUsersData = await apiUserDataModel.aggregate([
+      // { $match: { createdAt: { $gte: startTime, $lte: currentTime } } }, // Filter by createdAt field within the time window
       { $group: { _id: "$userId", count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $project: { _id: 0, userId: "$_id", count: 1 } },
@@ -238,35 +251,25 @@ app.get("/topApiUsers", async (req, res) => {
   }
 });
 
-// Route for fetching top users by endpoint
 app.get("/topUsersByEndpoint", async (req, res) => {
   try {
     const topUsersByEndpointData = await apiUserDataModel.aggregate([
       {
         $group: {
           _id: { endpoint: "$endpoint", userId: "$userId" },
-          count: { $sum: 1 }, // Count of occurrences for each user at each endpoint
+          count: { $sum: 1 },
         },
       },
-      {
-        $sort: { "_id.endpoint": 1, count: -1 }, // Sort by endpoint and count
-      },
+      { $sort: { "_id.endpoint": 1, count: -1 } },
       {
         $group: {
           _id: "$_id.endpoint",
-          endpoint: { $first: "$_id.endpoint" }, // First occurrence of endpoint
-          topUser: { $first: "$_id.userId" }, // First occurrence of userId (top user)
-          count: { $first: "$count" }, // Count of top user for each endpoint
+          endpoint: { $first: "$_id.endpoint" },
+          topUser: { $first: "$_id.userId" },
+          count: { $first: "$count" },
         },
       },
-      {
-        $project: {
-          _id: 0,
-          endpoint: 1,
-          topUser: 1,
-          count: 1,
-        },
-      },
+      { $project: { _id: 0, endpoint: 1, topUser: 1, count: 1 } },
     ]);
     res.json(topUsersByEndpointData);
   } catch (err) {
@@ -279,11 +282,15 @@ app.get("/topUsersByEndpoint", async (req, res) => {
 // Route for fetching 4xx errors by endpoint
 app.get("/errors4xxByEndpoint", async (req, res) => {
   try {
-    const errors4xxByEndpointData = await apiUserDataModel.aggregate([
-      { $match: { status: { $gte: 400, $lt: 500 } } },
-      { $group: { _id: "$endpoint", count: { $sum: 1 } } },
-      { $project: { _id: 0, endpoint: "$_id", count: 1 } },
-    ]);
+    const currentTime = new Date();
+    const startTime = new Date(currentTime - timeWindow);
+
+    const errors4xxByEndpointData = await apiUserDataModel
+      .find({
+        status: { $gte: 400, $lt: 500 },
+        timestamp: { $gte: startTime, $lte: currentTime },
+      })
+      .limit(20);
     res.json(errors4xxByEndpointData);
   } catch (err) {
     res
@@ -295,9 +302,15 @@ app.get("/errors4xxByEndpoint", async (req, res) => {
 // Route for fetching recent 4xx/5xx errors
 app.get("/recentErrors4xx5xx", async (req, res) => {
   try {
-    const recentErrors4xx5xxData = await apiUserDataModel.find({
-      status: { $gte: 400, $lt: 600 },
-    });
+    const currentTime = new Date();
+    const startTime = new Date(currentTime - timeWindow);
+
+    const recentErrors4xx5xxData = await apiUserDataModel
+      .find({
+        status: { $gte: 400, $lt: 600 },
+        timestamp: { $gte: startTime, $lte: currentTime },
+      })
+      .limit(20);
     res.json(recentErrors4xx5xxData);
   } catch (err) {
     res
@@ -314,7 +327,7 @@ const start = asyncWrapper(async () => {
   await connectDB({ drop: false });
   const pokeSchema = await getTypes();
   // pokeModel = await populatePokemons(pokeSchema);
-  pokeModel = mongoose.model('pokemons', pokeSchema);
+  pokeModel = mongoose.model("pokemons", pokeSchema);
 
   app.listen(process.env.SERVER_PORT, async (err) => {
     if (err) throw new DbError(err);
