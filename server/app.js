@@ -4,6 +4,7 @@ const { asyncWrapper } = require("./asyncWrapper.js");
 const dotenv = require("dotenv");
 dotenv.config();
 const userModel = require("./userModel.js");
+const apiUserDataModel = require("./apiUserDataModel.js");
 const { connectDB } = require("./connectDB.js");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
@@ -169,10 +170,18 @@ const authUser = asyncWrapper(async (req, res, next) => {
   try {
     const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     const { username } = payload.user;
+    req.username = username;
     const user = await userModel.findOne({ username });
     if (user.token_invalid) {
       throw new AuthError("Invalid Token Verification. Log in again.");
     }
+    // Create a new ApiUserData document
+    await apiUserDataModel.create({
+      userId: username,
+      timestamp: new Date(),
+      endpoint: req.originalUrl,
+      status: res.statusCode,
+    });
     next();
   } catch (err) {
     throw new AuthError("Invalid Token Verification. Log in again.");
@@ -196,101 +205,96 @@ app.get("/", (req, res) => {
 });
 
 app.use(authAdmin);
-// Mock database for demonstration purposes
-const apiUserData = [
-  {
-    id: 1,
-    userId: "user1",
-    timestamp: "2023-04-01T12:34:56Z",
-    endpoint: "/api/endpoint1",
-    status: 200,
-  },
-  {
-    id: 2,
-    userId: "user2",
-    timestamp: "2023-04-01T13:45:12Z",
-    endpoint: "/api/endpoint1",
-    status: 404,
-  },
-  {
-    id: 3,
-    userId: "user3",
-    timestamp: "2023-04-01T14:56:23Z",
-    endpoint: "/api/endpoint2",
-    status: 200,
-  },
-  // Add more mock data as needed
-];
-
 // Route for fetching unique API users over a period of time
-app.get("/uniqueApiUsers", (req, res) => {
-  // Replace with actual logic to fetch unique API users data
-  const uniqueApiUsersData = [
-    ...new Set(apiUserData.map((data) => data.userId)),
-  ];
-  res.json(uniqueApiUsersData);
+app.get("/uniqueApiUsers", async (req, res) => {
+  try {
+    const uniqueApiUsersData = await apiUserDataModel.distinct("userId");
+    res.json(uniqueApiUsersData);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch unique API users data" });
+  }
 });
 
 // Route for fetching top API users over a period of time
-app.get("/topApiUsers", (req, res) => {
-  // Replace with actual logic to fetch top API users data
-  const topApiUsersData = Object.entries(
-    apiUserData.reduce((acc, data) => {
-      if (!acc[data.userId]) {
-        acc[data.userId] = 0;
-      }
-      acc[data.userId]++;
-      return acc;
-    }, {})
-  ).map(([userId, count]) => ({ userId, count }));
-  res.json(topApiUsersData);
+app.get("/topApiUsers", async (req, res) => {
+  try {
+    const topApiUsersData = await apiUserDataModel.aggregate([
+      { $group: { _id: "$userId", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $project: { _id: 0, userId: "$_id", count: 1 } },
+    ]);
+    res.json(topApiUsersData);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch top API users data" });
+  }
 });
 
 // Route for fetching top users by endpoint
-app.get("/topUsersByEndpoint", (req, res) => {
-  // Replace with actual logic to fetch top users by endpoint data
-  const topUsersByEndpointData = Object.entries(
-    apiUserData.reduce((acc, data) => {
-      if (!acc[data.endpoint]) {
-        acc[data.endpoint] = new Set();
-      }
-      acc[data.endpoint].add(data.userId);
-      return acc;
-    }, {})
-  ).map(([endpoint, userIds]) => ({ endpoint, userIds: Array.from(userIds) }));
-  res.json(topUsersByEndpointData);
+app.get("/topUsersByEndpoint", async (req, res) => {
+  try {
+    const topUsersByEndpointData = await apiUserDataModel.aggregate([
+      {
+        $group: {
+          _id: { endpoint: "$endpoint", userId: "$userId" },
+          count: { $sum: 1 }, // Count of occurrences for each user at each endpoint
+        },
+      },
+      {
+        $sort: { "_id.endpoint": 1, count: -1 }, // Sort by endpoint and count
+      },
+      {
+        $group: {
+          _id: "$_id.endpoint",
+          endpoint: { $first: "$_id.endpoint" }, // First occurrence of endpoint
+          topUser: { $first: "$_id.userId" }, // First occurrence of userId (top user)
+          count: { $first: "$count" }, // Count of top user for each endpoint
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          endpoint: 1,
+          topUser: 1,
+          count: 1,
+        },
+      },
+    ]);
+    res.json(topUsersByEndpointData);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: "Failed to fetch top users by endpoint data" });
+  }
 });
 
 // Route for fetching 4xx errors by endpoint
-app.get("/errors4xxByEndpoint", (req, res) => {
-  // Replace with actual logic to fetch 4xx errors by endpoint data
-  const errors4xxByEndpointData = Object.entries(
-    apiUserData.reduce((acc, data) => {
-      if (data.status >= 400 && data.status < 500) {
-        if (!acc[data.endpoint]) {
-          acc[data.endpoint] = 0;
-        }
-        acc[data.endpoint]++;
-      }
-      return acc;
-    }, {})
-  ).map(([endpoint, count]) => ({ endpoint, count }));
-  res.json(errors4xxByEndpointData);
+app.get("/errors4xxByEndpoint", async (req, res) => {
+  try {
+    const errors4xxByEndpointData = await apiUserDataModel.aggregate([
+      { $match: { status: { $gte: 400, $lt: 500 } } },
+      { $group: { _id: "$endpoint", count: { $sum: 1 } } },
+      { $project: { _id: 0, endpoint: "$_id", count: 1 } },
+    ]);
+    res.json(errors4xxByEndpointData);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: "Failed to fetch 4xx errors by endpoint data" });
+  }
 });
 
 // Route for fetching recent 4xx/5xx errors
-app.get("/recentErrors4xx5xx", (req, res) => {
-  // Replace with actual logic to fetch recent 4xx/5xx errors data
-  const recentErrors4xx5xxData = apiUserData
-    .filter((data) => data.status >= 400 && data.status < 600)
-    .map((data) => ({
-      id: data.id,
-      userId: data.userId,
-      timestamp: data.timestamp,
-      endpoint: data.endpoint,
-      status: data.status,
-    }));
-  res.json(recentErrors4xx5xxData);
+app.get("/recentErrors4xx5xx", async (req, res) => {
+  try {
+    const recentErrors4xx5xxData = await apiUserDataModel.find({
+      status: { $gte: 400, $lt: 600 },
+    });
+    res.json(recentErrors4xx5xxData);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: "Failed to fetch recent 4xx/5xx errors data" });
+  }
 });
 
 app.get("*", function (req, res) {

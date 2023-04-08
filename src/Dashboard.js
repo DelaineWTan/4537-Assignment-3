@@ -150,14 +150,16 @@ const Dashboard = ({ accessToken }) => {
         <thead>
           <tr>
             <th>Endpoint</th>
-            <th>Users</th>
+            <th>User</th>
+            <th>User Count</th>
           </tr>
         </thead>
         <tbody>
           {topUsersByEndpoint.map((item, index) => (
             <tr key={index}>
               <td>{item.endpoint}</td>
-              <td>{item.userIds.join(", ")}</td>
+              <td>{item.topUser}</td>
+              <td>{item.count}</td>
             </tr>
           ))}
         </tbody>
