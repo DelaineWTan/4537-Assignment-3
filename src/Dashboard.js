@@ -132,12 +132,14 @@ const Dashboard = ({ accessToken }) => {
         <thead>
           <tr>
             <th>User</th>
+            <th>Count</th>
           </tr>
         </thead>
         <tbody>
-          {topApiUsers.map((user, index) => (
+          {topApiUsers.map((item, index) => (
             <tr key={index}>
-              <td>{user}</td>
+              <td>{item.userId}</td>
+              <td>{item.count}</td>
             </tr>
           ))}
         </tbody>
@@ -147,13 +149,15 @@ const Dashboard = ({ accessToken }) => {
       <table className="dashboard-table">
         <thead>
           <tr>
-            <th>User</th>
+            <th>Endpoint</th>
+            <th>Users</th>
           </tr>
         </thead>
         <tbody>
-          {topUsersByEndpoint.map((user, index) => (
+          {topUsersByEndpoint.map((item, index) => (
             <tr key={index}>
-              <td>{user}</td>
+              <td>{item.endpoint}</td>
+              <td>{item.userIds.join(", ")}</td>
             </tr>
           ))}
         </tbody>
@@ -190,7 +194,7 @@ const Dashboard = ({ accessToken }) => {
           {recentErrors4xx5xx.map((error, index) => (
             <tr key={index}>
               <td>{error.endpoint}</td>
-              <td>{error.errorCode}</td>
+              <td>{error.status}</td>
               <td>{error.timestamp}</td>
             </tr>
           ))}

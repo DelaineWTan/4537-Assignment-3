@@ -181,6 +181,8 @@ const authUser = asyncWrapper(async (req, res, next) => {
 
 const authAdmin = asyncWrapper(async (req, res, next) => {
   const { tokenType, token } = parseToken(req);
+  console.log({tokenType})
+  console.log({token})
   if (tokenType === "Bearer") {
     const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     if (payload?.user?.role == "admin" && !payload?.user?.token_invalid) {
@@ -196,38 +198,100 @@ app.get("/", (req, res) => {
 });
 
 app.use(authAdmin);
+// Mock database for demonstration purposes
+const apiUserData = [
+  {
+    id: 1,
+    userId: "user1",
+    timestamp: "2023-04-01T12:34:56Z",
+    endpoint: "/api/endpoint1",
+    status: 200,
+  },
+  {
+    id: 2,
+    userId: "user2",
+    timestamp: "2023-04-01T13:45:12Z",
+    endpoint: "/api/endpoint1",
+    status: 404,
+  },
+  {
+    id: 3,
+    userId: "user3",
+    timestamp: "2023-04-01T14:56:23Z",
+    endpoint: "/api/endpoint2",
+    status: 200,
+  },
+  // Add more mock data as needed
+];
+
 // Route for fetching unique API users over a period of time
 app.get("/uniqueApiUsers", (req, res) => {
   // Replace with actual logic to fetch unique API users data
-  const uniqueApiUsersData = [];
+  const uniqueApiUsersData = [
+    ...new Set(apiUserData.map((data) => data.userId)),
+  ];
   res.json(uniqueApiUsersData);
 });
 
 // Route for fetching top API users over a period of time
 app.get("/topApiUsers", (req, res) => {
   // Replace with actual logic to fetch top API users data
-  const topApiUsersData = [];
+  const topApiUsersData = Object.entries(
+    apiUserData.reduce((acc, data) => {
+      if (!acc[data.userId]) {
+        acc[data.userId] = 0;
+      }
+      acc[data.userId]++;
+      return acc;
+    }, {})
+  ).map(([userId, count]) => ({ userId, count }));
   res.json(topApiUsersData);
 });
 
 // Route for fetching top users by endpoint
 app.get("/topUsersByEndpoint", (req, res) => {
   // Replace with actual logic to fetch top users by endpoint data
-  const topUsersByEndpointData = [];
+  const topUsersByEndpointData = Object.entries(
+    apiUserData.reduce((acc, data) => {
+      if (!acc[data.endpoint]) {
+        acc[data.endpoint] = new Set();
+      }
+      acc[data.endpoint].add(data.userId);
+      return acc;
+    }, {})
+  ).map(([endpoint, userIds]) => ({ endpoint, userIds: Array.from(userIds) }));
   res.json(topUsersByEndpointData);
 });
 
 // Route for fetching 4xx errors by endpoint
 app.get("/errors4xxByEndpoint", (req, res) => {
   // Replace with actual logic to fetch 4xx errors by endpoint data
-  const errors4xxByEndpointData = [];
+  const errors4xxByEndpointData = Object.entries(
+    apiUserData.reduce((acc, data) => {
+      if (data.status >= 400 && data.status < 500) {
+        if (!acc[data.endpoint]) {
+          acc[data.endpoint] = 0;
+        }
+        acc[data.endpoint]++;
+      }
+      return acc;
+    }, {})
+  ).map(([endpoint, count]) => ({ endpoint, count }));
   res.json(errors4xxByEndpointData);
 });
 
 // Route for fetching recent 4xx/5xx errors
 app.get("/recentErrors4xx5xx", (req, res) => {
   // Replace with actual logic to fetch recent 4xx/5xx errors data
-  const recentErrors4xx5xxData = [];
+  const recentErrors4xx5xxData = apiUserData
+    .filter((data) => data.status >= 400 && data.status < 600)
+    .map((data) => ({
+      id: data.id,
+      userId: data.userId,
+      timestamp: data.timestamp,
+      endpoint: data.endpoint,
+      status: data.status,
+    }));
   res.json(recentErrors4xx5xxData);
 });
 
