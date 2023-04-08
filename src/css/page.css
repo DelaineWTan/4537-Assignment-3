@@ -7,6 +7,14 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  justify-content: center; /* Horizontally center align */
+  align-items: center; /* Vertically center align */
+}
+
+.pokemon-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .pokemon-image {

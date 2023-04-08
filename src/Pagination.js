@@ -10,9 +10,11 @@ function Pagination({ pokemons, PAGE_SIZE, currentPage, setCurrentPage }) {
   ) {
     pageNumbers.push(i);
   }
+
   return (
-    <div>
+    <div className="pagination-container">
       <button
+        className="pagination-button"
         disabled={currentPage < 2}
         onClick={() => setCurrentPage(currentPage - 1)}
       >
@@ -21,13 +23,16 @@ function Pagination({ pokemons, PAGE_SIZE, currentPage, setCurrentPage }) {
       {pageNumbers.map((pageNumber) => (
         <button
           key={pageNumber + 1}
-          className={currentPage === pageNumber + 1 ? "buttonActive" : ""}
+          className={`pagination-button ${
+            currentPage === pageNumber + 1 ? "buttonActive" : ""
+          }`}
           onClick={() => setCurrentPage(pageNumber + 1)}
         >
           {pageNumber + 1}
         </button>
       ))}
       <button
+        className="pagination-button"
         disabled={currentPage > Math.floor(pokemons.length / PAGE_SIZE)}
         onClick={() => setCurrentPage(currentPage + 1)}
       >

@@ -1,18 +1,25 @@
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.pagination-button {
+  padding: 8px 16px;
+  margin: 0 4px;
+  border: none;
+  background-color: #e0e0e0;
+  color: #333;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.pagination-button:hover {
+  background-color: #ddd;
+}
+
 .buttonActive {
   background-color: green;
   color: white;
-}
-
-.image-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  width: 100%;
-  margin: 0 auto;
-}
-
-.image {
-  width: 10%;
-  height: auto;
-  margin: 0;
 }
